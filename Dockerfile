@@ -1,13 +1,14 @@
-FROM php:7.2-apache
+FROM php:8.2-apache
 
 WORKDIR /var/www/html
 
+# Update to use Debian Bullseye repositories (PHP 8.2 uses Bullseye)
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y git curl zip libzip-dev
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install -y nodejs
 
 COPY . .
