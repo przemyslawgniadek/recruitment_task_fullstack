@@ -60,8 +60,8 @@ Encore
     // enables Sass/SCSS support
     //.enableSassLoader()
 
-    // uncomment if you use TypeScript
-    //.enableTypeScriptLoader()
+    // Enable TypeScript support
+    // .enableTypeScriptLoader() // Wyłączone - brak ts-loader zgodnie z wymaganiami
 
     // uncomment if you use React
     .enableReactPreset()
