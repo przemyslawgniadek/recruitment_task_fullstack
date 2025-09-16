@@ -4,15 +4,21 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    # NBP API Configuration
-    nbp.api.base_url: 'https://api.nbp.pl/api'
-    nbp.api.timeout: 10
-    nbp.api.retry_attempts: 3
+    # NBP API Configuration (from environment variables)
+    nbp.api.base_url: '%env(NBP_BASE_URL)%'
+    nbp.api.timeout: '%env(int:NBP_TIMEOUT)%'
+    nbp.api.retry_attempts: '%env(int:NBP_RETRY_ATTEMPTS)%'
     
-    # Cache Configuration
-    cache.fx_rates.ttl: 86400      # 24 hours
-    cache.nbp_api.ttl: 3600        # 1 hour
-    cache.app_metadata.ttl: 604800 # 1 week
+    # Supported Currency Codes
+    supported.currency.codes: '%env(csv:SUPPORTED_CODES)%'
+    
+    # Timezone Configuration
+    app.timezone: '%env(TIMEZONE)%'
+    
+    # Cache Configuration (from environment variables)
+    cache.fx_rates.ttl: '%env(int:CACHE_FX_RATES_TTL)%'      # 24 hours
+    cache.nbp_api.ttl: '%env(int:CACHE_NBP_API_TTL)%'        # 1 hour
+    cache.app_metadata.ttl: '%env(int:CACHE_APP_METADATA_TTL)%' # 1 week
 
 services:
     # default configuration for services in *this* file
@@ -71,6 +77,11 @@ services:
         public: true
 
     # Cache Services are configured in cache.yaml
+
+    # Timezone Service
+    App\Service\TimezoneService:
+        arguments:
+            $timezone: '%app.timezone%'
 
     # API Exception Handling
     App\EventListener\ApiExceptionListener:
