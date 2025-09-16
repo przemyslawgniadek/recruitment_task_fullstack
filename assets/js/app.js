@@ -1,17 +1,9 @@
 /*
- * Welcome to your app's main JavaScript file!
- *
- * We recommend including the built version of this JavaScript file
- * (and its CSS file) in your base layout (base.html.twig).
+ * Telemedi FX Desk - Main Application Entry Point
+ * 
+ * TypeScript + React application for currency exchange rate management.
+ * Provides dashboard and historical views for FX desk operations.
  */
-
-// any CSS you import will output into a single css file (app.css in this case)
-//import './css/app.css';
-
-// start the Stimulus application
-//import './bootstrap';
-
-
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -19,5 +11,12 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import '../css/app.css';
 import Home from './components/Home';
 
-ReactDOM.render(<Router><Home /></Router>, document.getElementById('root'));
-
+// Render the main application (React 17 syntax)
+ReactDOM.render(
+  <React.StrictMode>
+    <Router>
+      <Home />
+    </Router>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
