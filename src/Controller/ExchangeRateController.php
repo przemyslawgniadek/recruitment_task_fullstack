@@ -15,6 +15,7 @@ use App\Dto\Response\RateResponse;
 use App\Exception\InvalidCurrencyException;
 use App\Exception\RateNotFoundException;
 use App\Exception\ServiceUnavailableException;
+use App\Service\TimezoneService;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,6 +42,7 @@ class ExchangeRateController extends AbstractController
 {
     public function __construct(
         private RateRepository $rateRepository,
+        private TimezoneService $timezoneService,
         private LoggerInterface $logger
     ) {
     }
@@ -197,7 +199,7 @@ class ExchangeRateController extends AbstractController
     {
         try {
             // Test repository connection by checking if we can get today's rates
-            $today = new DateTimeImmutable();
+            $today = $this->timezoneService->today();
             $testCurrency = Currency::fromCode('EUR');
             
             // This will test the entire chain: Controller -> Repository -> Cache -> NBP API
