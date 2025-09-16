@@ -24,7 +24,7 @@ use Psr\Log\NullLogger;
  * - Transparent to Domain Layer (same interface)
  * - Easy to enable/disable caching
  */
-final class CachedRateRepository implements RateRepository
+class CachedRateRepository implements RateRepository
 {
     private const CACHE_TTL = 86400; // 24 hours in seconds
     

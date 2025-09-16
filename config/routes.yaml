@@ -8,6 +8,12 @@ setupcheck:
     path: /api/setup-check
     controller: App\Controller\DefaultController::setupCheck
 
+# API Routes
+api_exchange_rates:
+    resource: ../src/Controller/ExchangeRateController.php
+    type: annotation
+    prefix: /api
+
 index:
     path: /{wildcard}
     defaults: {

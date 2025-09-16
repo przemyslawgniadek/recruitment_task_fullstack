@@ -36,16 +36,13 @@ services:
 
     # Infrastructure Services
     App\Infrastructure\Nbp\NbpHttpClient:
-        arguments:
-            $baseUrl: '%nbp.api.base_url%'
-            $timeout: '%nbp.api.timeout%'
-            $retryAttempts: '%nbp.api.retry_attempts%'
+        # Uses default constructor with no arguments
 
     # Repository Services
     App\Infrastructure\Nbp\NbpRateRepository:
         arguments:
             $nbpClient: '@App\Infrastructure\Nbp\NbpHttpClient'
-            $quotingRulesService: '@App\Domain\QuotingRules\QuotingRulesService'
+            $quotingRules: '@App\Domain\QuotingRules\QuotingRulesService'
 
     # Cache Services
     App\Infrastructure\Cache\CacheKeyGenerator:
@@ -69,20 +66,16 @@ services:
 
     # Primary Repository Alias
     # Controllers will use this alias to get the cached repository
-    App\Domain\Rate\RateRepository: '@App\Infrastructure\Cache\CachedRateRepository'
+    App\Domain\Rate\RateRepository: 
+        alias: 'App\Infrastructure\Cache\CachedRateRepository'
+        public: true
 
-    # Cache Services
-    cache.fx_rates:
-        parent: cache.app
-        tags:
-            - { name: 'cache.pool', provider: 'cache.fx_rates' }
+    # Cache Services are configured in cache.yaml
 
-    cache.nbp_api:
-        parent: cache.app  
+    # API Exception Handling
+    App\EventListener\ApiExceptionListener:
+        arguments:
+            $logger: '@logger'
+            $environment: '%kernel.environment%'
         tags:
-            - { name: 'cache.pool', provider: 'cache.nbp_api' }
-
-    cache.app_metadata:
-        parent: cache.app
-        tags:
-            - { name: 'cache.pool', provider: 'cache.app_metadata' }
+            - { name: kernel.event_listener, event: kernel.exception }
