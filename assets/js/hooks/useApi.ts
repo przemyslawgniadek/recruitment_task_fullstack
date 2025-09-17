@@ -1,179 +1,207 @@
 /**
  * React Hooks for API Integration
  * 
- * Custom hooks for fetching data from backend API with loading states,
- * error handling, and automatic re-fetching capabilities.
+ * Provides custom hooks for consuming the ApiClient with automatic
+ * loading states, error handling, and request cancellation.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { apiClient } from '../services/ApiClient';
-import {
-  CurrentRatesResponse,
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import ApiClient from '../services/ApiClient';
+import { 
+  CurrentRatesRequest, 
+  CurrentRatesResponse, 
+  HistoricalRatesRequest, 
   HistoricalRatesResponse,
   CurrenciesResponse,
   HealthResponse,
-  ApiError,
-  ApiResponse,
-  CurrencyCode,
-  CurrentRatesRequest,
-  HistoricalRatesRequest
+  ApiError 
 } from '../types/api';
 
-// ============================================================================
-// GENERIC API HOOK
-// ============================================================================
+/**
+ * Generic API response state
+ */
+interface ApiResponse<T> {
+  data: T | null;
+  loading: boolean;
+  error: ApiError | null;
+}
 
 /**
  * Generic hook for API calls with loading states
  */
-export function useApiCall<T>(
-  apiMethod: () => Promise<T>,
-  dependencies: any[] = [],
-  immediate: boolean = true
+export function useApiCall<T, P = void>(
+  apiMethod: (params: P, signal?: AbortSignal) => Promise<T>,
+  params: P,
+  immediate: boolean = true,
+  deps: React.DependencyList = []
 ): ApiResponse<T> & { refetch: () => Promise<void> } {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(immediate);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const hasInitializedRef = useRef<boolean>(false);
 
   const fetchData = useCallback(async () => {
-    // Cancel previous request if still pending
+    console.log(`🎯 fetchData called with params:`, params);
+    
+    // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
     // Create new abort controller
     abortControllerRef.current = new AbortController();
+    
+    setLoading(true);
+    setError(null);
 
     try {
-      setLoading(true);
-      setError(null);
-      
-      const result = await apiMethod();
-      
-      // Only update state if request wasn't aborted
-      if (!abortControllerRef.current.signal.aborted) {
-        setData(result);
-      }
+      const result = await apiMethod(params, abortControllerRef.current.signal);
+      console.log(`✅ fetchData success:`, result);
+      setData(result);
     } catch (err) {
-      // Only update state if request wasn't aborted
-      if (!abortControllerRef.current.signal.aborted) {
-        setError(err as ApiError);
-        setData(null);
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log(`⏹️ fetchData aborted`);
+        return;
       }
+      console.error(`❌ fetchData error:`, err);
+      setError(err as ApiError);
     } finally {
-      // Only update loading state if request wasn't aborted
-      if (!abortControllerRef.current.signal.aborted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-  }, dependencies);
+  }, [apiMethod]);
 
-  const refetch = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
-
+  // Single useEffect for both immediate and deps
   useEffect(() => {
-    if (immediate) {
+    console.log(`🎯 useEffect - immediate: ${immediate}, hasInitialized: ${hasInitializedRef.current}, deps:`, deps);
+    
+    if (immediate && !hasInitializedRef.current) {
+      console.log(`🚀 Initial fetch`);
+      hasInitializedRef.current = true;
+      fetchData();
+    } else if (hasInitializedRef.current) {
+      console.log(`🔄 Deps changed, refetching`);
       fetchData();
     }
+  }, [immediate, ...deps]);
 
-    // Cleanup function to abort request on unmount
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
-  }, [fetchData, immediate]);
+  }, []);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch
-  };
+  return { data, loading, error, refetch: fetchData };
 }
 
-// ============================================================================
-// SPECIFIC API HOOKS
-// ============================================================================
-
 /**
- * Hook for fetching current exchange rates
+ * Hook for current exchange rates
  */
 export function useCurrentRates(
   request: CurrentRatesRequest = {},
-  immediate: boolean = true
+  immediate: boolean = true,
+  deps: React.DependencyList = []
 ): ApiResponse<CurrentRatesResponse> & { refetch: () => Promise<void> } {
+  const apiClient = ApiClient.getInstance();
   return useApiCall(
-    () => apiClient.getCurrentRates(request),
-    [request.date],
-    immediate
+    (p, signal) => apiClient.getCurrentRates(p, signal), 
+    request, 
+    immediate, 
+    deps
   );
 }
 
 /**
- * Hook for fetching supported currencies
+ * Hook for supported currencies
  */
 export function useCurrencies(
-  immediate: boolean = true
+  immediate: boolean = true,
+  deps: React.DependencyList = []
 ): ApiResponse<CurrenciesResponse> & { refetch: () => Promise<void> } {
+  const apiClient = ApiClient.getInstance();
   return useApiCall(
-    () => apiClient.getCurrencies(),
-    [],
-    immediate
+    (_, signal) => apiClient.getCurrencies(signal), 
+    undefined, 
+    immediate, 
+    deps
   );
 }
 
 /**
- * Hook for fetching historical rates
+ * Hook for API health check
+ */
+export function useHealth(
+  immediate: boolean = true,
+  deps: React.DependencyList = []
+): ApiResponse<HealthResponse> & { refetch: () => Promise<void> } {
+  const apiClient = ApiClient.getInstance();
+  return useApiCall(
+    (_, signal) => apiClient.getHealth(signal), 
+    undefined, 
+    immediate, 
+    deps
+  );
+}
+
+/**
+ * Hook for historical rates
  */
 export function useHistoricalRates(
   request: HistoricalRatesRequest,
-  immediate: boolean = true
+  immediate: boolean = true,
+  deps: React.DependencyList = []
 ): ApiResponse<HistoricalRatesResponse> & { refetch: () => Promise<void> } {
+  const apiClient = ApiClient.getInstance();
   return useApiCall(
-    () => apiClient.getHistoricalRates(request),
-    [request.currency, request.date, request.days],
-    immediate
+    (p, signal) => apiClient.getHistoricalRates(p, signal), 
+    request, 
+    immediate, 
+    deps
   );
 }
 
 /**
- * Hook for health check
+ * Hook for connection status monitoring
  */
-export function useHealth(
-  immediate: boolean = true
-): ApiResponse<HealthResponse> & { refetch: () => Promise<void> } {
-  return useApiCall(
-    () => apiClient.getHealth(),
-    [],
-    immediate
-  );
-}
+export function useConnectionStatus(
+  intervalMs: number = 30000
+): { isOnline: boolean; lastCheck: Date | null; checkConnection: () => Promise<void> } {
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [lastCheck, setLastCheck] = useState<Date | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-// ============================================================================
-// SPECIALIZED HOOKS
-// ============================================================================
+  const checkConnection = useCallback(async () => {
+    const apiClient = ApiClient.getInstance();
+    try {
+      const isConnected = await apiClient.testConnection();
+      setIsOnline(isConnected);
+      setLastCheck(new Date());
+    } catch (error) {
+      setIsOnline(false);
+      setLastCheck(new Date());
+    }
+  }, []);
 
-/**
- * Hook for fetching rates for a specific currency
- */
-export function useCurrencyRate(
-  currency: CurrencyCode,
-  date?: string,
-  immediate: boolean = true
-) {
-  const { data, loading, error, refetch } = useCurrentRates({ date }, immediate);
-  
-  const currencyRate = data?.rates[currency] || null;
-  
-  return {
-    data: currencyRate,
-    loading,
-    error,
-    refetch
-  };
+  useEffect(() => {
+    // Initial check
+    checkConnection();
+
+    // Set up periodic checks
+    if (intervalMs > 0) {
+      intervalRef.current = setInterval(checkConnection, intervalMs);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [checkConnection, intervalMs]);
+
+  return { isOnline, lastCheck, checkConnection };
 }
 
 /**
@@ -181,7 +209,7 @@ export function useCurrencyRate(
  */
 export function usePeriodicRefresh<T>(
   hook: () => ApiResponse<T> & { refetch: () => Promise<void> },
-  intervalMs: number = 60000 // 1 minute default
+  intervalMs: number = 60000
 ): ApiResponse<T> & { refetch: () => Promise<void>; isRefreshing: boolean } {
   const apiResponse = hook();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -199,136 +227,103 @@ export function usePeriodicRefresh<T>(
   useEffect(() => {
     if (intervalMs > 0) {
       intervalRef.current = setInterval(refreshData, intervalMs);
-      
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
     }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [refreshData, intervalMs]);
 
-  return {
-    ...apiResponse,
-    isRefreshing
-  };
+  return { ...apiResponse, isRefreshing };
 }
-
-/**
- * Hook for connection status monitoring
- */
-export function useConnectionStatus(checkIntervalMs: number = 30000): {
-  isOnline: boolean;
-  lastCheck: Date | null;
-  checkConnection: () => Promise<void>;
-} {
-  const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [lastCheck, setLastCheck] = useState<Date | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const checkConnection = useCallback(async () => {
-    try {
-      const isConnected = await apiClient.testConnection();
-      setIsOnline(isConnected);
-      setLastCheck(new Date());
-    } catch (error) {
-      setIsOnline(false);
-      setLastCheck(new Date());
-    }
-  }, []);
-
-  useEffect(() => {
-    // Initial check
-    checkConnection();
-
-    // Set up periodic checks
-    if (checkIntervalMs > 0) {
-      intervalRef.current = setInterval(checkConnection, checkIntervalMs);
-      
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
-    }
-  }, [checkConnection, checkIntervalMs]);
-
-  return {
-    isOnline,
-    lastCheck,
-    checkConnection
-  };
-}
-
-// ============================================================================
-// UTILITY HOOKS
-// ============================================================================
 
 /**
  * Hook for debounced API calls
  */
-export function useDebouncedApiCall<T>(
-  apiMethod: () => Promise<T>,
+export function useDebouncedApiCall<T, P>(
+  apiMethod: (params: P, signal?: AbortSignal) => Promise<T>,
   delay: number = 500,
-  dependencies: any[] = []
-): ApiResponse<T> & { refetch: () => Promise<void> } {
-  const [debouncedDeps, setDebouncedDeps] = useState(dependencies);
+  deps: React.DependencyList = []
+): [
+  (params: P) => void,
+  ApiResponse<T>
+] {
+  const [params, setParams] = useState<P | null>(null);
+  const [debouncedParams, setDebouncedParams] = useState<P | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Debounce the params
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    if (params !== null) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      timeoutRef.current = setTimeout(() => {
+        setDebouncedParams(params);
+      }, delay);
     }
-
-    timeoutRef.current = setTimeout(() => {
-      setDebouncedDeps(dependencies);
-    }, delay);
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, dependencies);
+  }, [params, delay]);
 
-  return useApiCall(apiMethod, debouncedDeps);
+  const apiResponse = useApiCall(
+    apiMethod,
+    debouncedParams as P,
+    debouncedParams !== null,
+    deps
+  );
+
+  const triggerCall = useCallback((newParams: P) => {
+    setParams(newParams);
+  }, []);
+
+  return [triggerCall, apiResponse];
 }
 
 /**
- * Hook for caching API responses
+ * Hook for cached API calls
  */
-export function useCachedApiCall<T>(
-  apiMethod: () => Promise<T>,
+export function useCachedApiCall<T, P>(
+  apiMethod: (params: P, signal?: AbortSignal) => Promise<T>,
   cacheKey: string,
-  ttlMs: number = 300000, // 5 minutes default
-  dependencies: any[] = []
+  ttlMs: number = 300000, // 5 minutes
+  deps: React.DependencyList = []
 ): ApiResponse<T> & { refetch: () => Promise<void>; isCached: boolean } {
-  const [cache, setCache] = useState<Map<string, { data: T; timestamp: number }>>(new Map());
-  
-  const cachedApiMethod = useCallback(async (): Promise<T> => {
-    const now = Date.now();
-    const cached = cache.get(cacheKey);
+  const [isCached, setIsCached] = useState(false);
+
+  const cachedApiMethod = useCallback(async (params: P, signal?: AbortSignal): Promise<T> => {
+    const cache = sessionStorage.getItem(cacheKey);
     
-    // Return cached data if still valid
-    if (cached && (now - cached.timestamp) < ttlMs) {
-      return cached.data;
+    if (cache) {
+      const { data, timestamp } = JSON.parse(cache);
+      const isExpired = Date.now() - timestamp > ttlMs;
+      
+      if (!isExpired) {
+        setIsCached(true);
+        return data;
+      }
     }
-    
-    // Fetch fresh data
-    const freshData = await apiMethod();
-    
-    // Update cache
-    setCache(prev => new Map(prev).set(cacheKey, { data: freshData, timestamp: now }));
-    
-    return freshData;
-  }, [apiMethod, cacheKey, ttlMs, cache]);
 
-  const apiResponse = useApiCall(cachedApiMethod, dependencies);
-  const cached = cache.get(cacheKey);
-  const isCached = cached ? (Date.now() - cached.timestamp) < ttlMs : false;
+    setIsCached(false);
+    const result = await apiMethod(params, signal);
+    
+    // Cache the result
+    sessionStorage.setItem(cacheKey, JSON.stringify({
+      data: result,
+      timestamp: Date.now()
+    }));
+    
+    return result;
+  }, [apiMethod, cacheKey, ttlMs]);
 
-  return {
-    ...apiResponse,
-    isCached
-  };
+  const apiResponse = useApiCall(cachedApiMethod, {} as P, true, deps);
+
+  return { ...apiResponse, isCached };
 }

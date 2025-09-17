@@ -34,11 +34,16 @@ export interface Currency {
  * Matches RateResponse DTO from backend
  */
 export interface Rate {
-  code: CurrencyCode;
+  currency: CurrencyCode; // Changed from 'code' to match API
   date: string; // ISO date string (YYYY-MM-DD)
   mid: number;  // NBP middle rate
   buy: number | null; // Buy rate (null for CZK, IDR, BRL)
   sell: number; // Sell rate
+  supports_buying: boolean; // Whether currency supports buying
+  margins: {
+    buy: number | null; // Buy margin (null if no buying)
+    sell: number; // Sell margin
+  };
 }
 
 /**
