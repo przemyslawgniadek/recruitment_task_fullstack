@@ -12,7 +12,6 @@ setupcheck:
 api_exchange_rates:
     resource: ../src/Controller/ExchangeRateController.php
     type: annotation
-    prefix: /api
 
 index:
     path: /{wildcard}
@@ -20,6 +19,6 @@ index:
         _controller: App\Controller\DefaultController::index
     }
     requirements:
-        wildcard: .*
+        wildcard: ^(?!api/).*
     # controller: App\Controller\DefaultController::index
 
