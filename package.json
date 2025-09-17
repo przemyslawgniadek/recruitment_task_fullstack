@@ -5,8 +5,13 @@
         "@babel/preset-react": "^7.22.15",
         "@symfony/webpack-encore": "^4.0.0",
         "@testing-library/react": "^12.1.5",
+        "@types/react": "^17.0.88",
+        "@types/react-dom": "^17.0.26",
+        "@types/react-router-dom": "^5.3.3",
         "core-js": "^3.23.0",
         "regenerator-runtime": "^0.13.9",
+        "ts-loader": "^9.5.4",
+        "typescript": "^5.9.2",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
         "webpack-notifier": "^1.15.0"
