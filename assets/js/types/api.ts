@@ -62,9 +62,9 @@ export interface CurrentRatesResponse {
  */
 export interface HistoricalRatesResponse {
   currency: CurrencyCode;
-  startDate: string; // ISO date string
-  endDate: string;   // ISO date string
-  daysRequested: number;
+  start_date: string; // ISO date string (backend uses snake_case)
+  end_date: string;   // ISO date string (backend uses snake_case)
+  days_requested: number; // Backend uses snake_case
   rates: Rate[];
   count: number;
 }

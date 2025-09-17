@@ -159,7 +159,7 @@ export function useHistoricalRates(
     (p, signal) => apiClient.getHistoricalRates(p, signal), 
     request, 
     immediate, 
-    deps
+    [request.currency, request.date, request.days, ...deps]
   );
 }
 

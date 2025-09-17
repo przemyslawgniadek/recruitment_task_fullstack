@@ -215,7 +215,7 @@ class ApiClient {
     if (request.days) params.append('days', request.days.toString());
 
     const response = await this.axiosInstance.get<HistoricalRatesResponse>(
-      `/rates/${request.currency}/history?${params.toString()}`,
+      `/rates/historical/${request.currency}?${params.toString()}`,
       { signal }
     );
     return response.data;
