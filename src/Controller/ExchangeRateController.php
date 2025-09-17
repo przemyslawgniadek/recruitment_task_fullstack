@@ -206,23 +206,32 @@ class ExchangeRateController extends AbstractController
             $exists = $this->rateRepository->exists($testCurrency, $today);
             
             $responseData = [
-                'status' => 'healthy',
+                'status' => 'ok',
                 'timestamp' => $today->format('c'),
-                'services' => [
-                    'api' => 'operational',
-                    'repository' => 'operational',
-                    'cache' => 'operational'
-                ],
-                'test_results' => [
-                    'eur_rate_available' => $exists
+                'checks' => [
+                    'database' => 'ok',
+                    'nbp_api' => 'ok',
+                    'cache' => 'ok'
                 ]
             ];
             
             return $this->json($responseData);
             
         } catch (\Exception $e) {
-            throw new ServiceUnavailableException('exchange_rate_api', 
-                'Health check failed: ' . $e->getMessage(), $e);
+            $this->logger->error('Health check failed: ' . $e->getMessage(), ['exception' => $e]);
+            
+            $errorData = [
+                'status' => 'error',
+                'timestamp' => (new DateTimeImmutable())->format('c'),
+                'checks' => [
+                    'database' => 'error',
+                    'nbp_api' => 'error', 
+                    'cache' => 'error'
+                ],
+                'message' => 'Health check failed: ' . $e->getMessage()
+            ];
+            
+            return $this->json($errorData, Response::HTTP_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -234,6 +243,17 @@ class ExchangeRateController extends AbstractController
     {
         $supportedCodes = $this->getSupportedCurrencyCodes();
         return in_array(strtoupper($currency), $supportedCodes, true);
+    }
+
+    /**
+     * Frontend application entry point
+     * 
+     * Serves the React application for all non-API routes.
+     * This allows React Router to handle client-side routing.
+     */
+    public function index(): Response
+    {
+        return $this->render('app-root.html.twig');
     }
 
     /**
