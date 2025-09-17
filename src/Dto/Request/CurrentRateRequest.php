@@ -45,8 +45,36 @@ final class CurrentRateRequest
         }
 
         try {
-            return new \DateTimeImmutable($this->date);
+            $requestedDate = new \DateTimeImmutable($this->date);
+            
+            // Validate date range: max 14 days back, not future
+            $today = new \DateTimeImmutable();
+            $minDate = $today->modify('-14 days');
+            
+            if ($requestedDate > $today) {
+                throw new \InvalidArgumentException(
+                    sprintf('Date cannot be in the future. Requested: %s, Today: %s', 
+                        $requestedDate->format('Y-m-d'), 
+                        $today->format('Y-m-d')
+                    )
+                );
+            }
+            
+            if ($requestedDate < $minDate) {
+                throw new \InvalidArgumentException(
+                    sprintf('Date cannot be more than 14 days in the past. Requested: %s, Minimum: %s', 
+                        $requestedDate->format('Y-m-d'), 
+                        $minDate->format('Y-m-d')
+                    )
+                );
+            }
+            
+            return $requestedDate;
         } catch (\Exception $e) {
+            if ($e instanceof \InvalidArgumentException) {
+                throw $e; // Re-throw our validation errors
+            }
+            
             throw new \InvalidArgumentException(
                 sprintf('Invalid date format: %s. Expected format: YYYY-MM-DD', $this->date)
             );

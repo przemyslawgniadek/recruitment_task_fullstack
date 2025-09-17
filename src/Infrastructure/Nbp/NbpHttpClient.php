@@ -30,7 +30,7 @@ class NbpHttpClient
     public function __construct(?Client $httpClient = null)
     {
         $this->httpClient = $httpClient ?? new Client([
-            'base_uri' => self::BASE_URL,
+            'base_uri' => self::BASE_URL . '/',
             'timeout' => 10.0,
             'headers' => [
                 'Accept' => 'application/json',
@@ -134,7 +134,7 @@ class NbpHttpClient
      */
     private function buildTableUrl(?DateTimeImmutable $date): string
     {
-        $path = sprintf('/exchangerates/tables/%s/', self::TABLE_A);
+        $path = sprintf('exchangerates/tables/%s/', self::TABLE_A);
         
         if ($date !== null) {
             $path .= $date->format('Y-m-d') . '/';
@@ -148,7 +148,7 @@ class NbpHttpClient
      */
     private function buildSingleRateUrl(string $currencyCode, ?DateTimeImmutable $date): string
     {
-        $path = sprintf('/exchangerates/rates/%s/%s/', self::TABLE_A, strtoupper($currencyCode));
+        $path = sprintf('exchangerates/rates/%s/%s/', self::TABLE_A, strtoupper($currencyCode));
         
         if ($date !== null) {
             $path .= $date->format('Y-m-d') . '/';
@@ -166,7 +166,7 @@ class NbpHttpClient
         DateTimeImmutable $endDate
     ): string {
         $path = sprintf(
-            '/exchangerates/rates/%s/%s/%s/%s/',
+            'exchangerates/rates/%s/%s/%s/%s/',
             self::TABLE_A,
             strtoupper($currencyCode),
             $startDate->format('Y-m-d'),
