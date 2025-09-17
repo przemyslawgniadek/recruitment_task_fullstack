@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Redirect, Switch, Link } from 'react-router-dom';
 import SetupCheck from './SetupCheck';
+import Dashboard from './Dashboard';
 
 /**
  * Home Component - Main application layout
@@ -18,8 +19,13 @@ const Home: React.FC = () => {
         <div id="navbarText">
           <ul className="navbar-nav mr-auto">
             <li className="nav-item">
+              <Link className="nav-link" to="/dashboard">
+                💱 Dashboard
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link className="nav-link" to="/setup-check">
-                Setup Check
+                🔧 Setup Check
               </Link>
             </li>
           </ul>
@@ -27,7 +33,11 @@ const Home: React.FC = () => {
       </nav>
       
       <Switch>
-        <Redirect exact from="/" to="/setup-check" />
+        <Redirect exact from="/" to="/dashboard" />
+        <Route path="/dashboard" render={() => {
+          console.log("🚀 Dashboard route matched!");
+          return <Dashboard />;
+        }} />
         <Route path="/setup-check" component={SetupCheck} />
       </Switch>
     </div>
