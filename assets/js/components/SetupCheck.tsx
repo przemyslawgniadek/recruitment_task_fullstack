@@ -34,16 +34,16 @@ const SetupCheck: React.FC = () => {
         <div className="container">
           <div className="row mt-5">
             <div className="col-md-8 offset-md-2">
-              <h2 className="text-center">
+              <h2 className="text-center" id="setup-check-title">
                 <span>FX Desk Setup Check</span> @ Telemedi
               </h2>
 
               {isLoading ? (
                 <div className="text-center">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="sr-only">Loading...</span>
+                  <div className="spinner-border text-primary" role="status" aria-hidden="true">
+                    <span className="visually-hidden">Loading...</span>
                   </div>
-                  <p className="mt-3">Checking API connectivity...</p>
+                  <p className="mt-3" aria-live="polite">Checking API connectivity...</p>
                 </div>
               ) : (
                 <div>

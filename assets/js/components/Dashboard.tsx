@@ -83,7 +83,13 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ currency, rate }) => {
     <tr className={hasBuyRate ? 'table-success' : 'table-warning'}>
       <td>
         <div className="d-flex align-items-center">
-          <span className="me-2" style={{ fontSize: '1.2em' }}>{config.flag}</span>
+          <span 
+            className="me-2" 
+            style={{ fontSize: '1.2em' }}
+            aria-hidden="true"
+          >
+            {config.flag}
+          </span>
           <div>
             <strong>{currency}</strong>
             <br />
@@ -91,7 +97,7 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ currency, rate }) => {
           </div>
         </div>
       </td>
-      <td className="text-end">
+      <td className="text-end d-none d-md-table-cell">
         <strong>{formatPLN(rate.mid)}</strong>
       </td>
       <td className="text-end">
@@ -110,7 +116,7 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ currency, rate }) => {
           <strong>{formatPLN(rate.sell)}</strong>
         </span>
       </td>
-      <td className="text-end">
+      <td className="text-end d-none d-lg-table-cell">
         <small>
           <div className="text-success">
             Buy: {formatPercentage(rate.margins.buy)}
@@ -131,8 +137,10 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ currency, rate }) => {
             to={`/history/${currency}`} 
             className="btn btn-outline-primary btn-sm"
             style={{ fontSize: '0.75rem' }}
+            aria-label={`View ${currency} exchange rate history`}
+            title={`View historical data for ${currency}`}
           >
-            📈 History
+            <span aria-hidden="true">📈</span> History
           </Link>
         </div>
       </td>
@@ -182,12 +190,16 @@ const Dashboard: React.FC<DashboardProps> = ({ defaultDate }) => {
         <div className="col-12">
           <div className="d-flex justify-content-between align-items-center">
             <div>
-              <h1 className="h3 mb-1">💱 FX Desk Dashboard</h1>
-              <p className="text-muted mb-0">
+              <h1 className="h3 mb-1" id="dashboard-title">
+                <span className="text-primary" aria-hidden="true">💱</span> 
+                <span className="visually-hidden">Currency Exchange</span>
+                FX Desk Dashboard
+              </h1>
+              <p className="text-muted mb-0" id="dashboard-subtitle" aria-describedby="dashboard-title">
                 Live exchange rates for currency desk operations
               </p>
             </div>
-            <div className="d-flex align-items-center gap-3">
+            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
               <div className="date-picker-container">
                 <label htmlFor="dateSelect" className="form-label mb-1">
                   <small><strong>Rate Date:</strong> <span className="text-muted">(last 14 days)</span></small>
@@ -201,21 +213,32 @@ const Dashboard: React.FC<DashboardProps> = ({ defaultDate }) => {
                   min={getMinDate()}
                   max={getTodayDate()}
                   key={selectedDate}
+                  aria-label="Select date for exchange rates"
+                  aria-describedby="date-help"
                 />
+                <div id="date-help" className="visually-hidden">
+                  Select a date within the last 14 days to view exchange rates
+                </div>
               </div>
               <button
                 className="btn btn-outline-primary"
                 onClick={handleRefresh}
                 disabled={loading}
+                aria-label={loading ? "Refreshing exchange rates" : "Refresh exchange rates"}
+                title={loading ? "Refreshing..." : "Refresh exchange rates"}
               >
                 {loading ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" />
-                    Refreshing...
+                    <span 
+                      className="spinner-border spinner-border-sm me-2" 
+                      role="status"
+                      aria-hidden="true"
+                    />
+                    <span>Refreshing...</span>
                   </>
                 ) : (
                   <>
-                    🔄 Refresh
+                    <span aria-hidden="true">🔄</span> Refresh
                   </>
                 )}
               </button>
@@ -297,20 +320,25 @@ const Dashboard: React.FC<DashboardProps> = ({ defaultDate }) => {
             /* Success State - Rates Table */
             <div className="card">
               <div className="card-header bg-primary text-white">
-                <h5 className="card-title mb-0">
-                  💰 Exchange Rates - {data.date}
+                <h5 className="card-title mb-0" id="rates-table-title">
+                  <span aria-hidden="true">💰</span> Exchange Rates - {data.date}
                 </h5>
               </div>
               <div className="card-body p-0">
                 <div className="table-responsive">
-                  <table className="table table-hover mb-0">
+                  <table 
+                    className="table table-hover table-sm mb-0"
+                    role="table"
+                    aria-labelledby="rates-table-title"
+                    aria-describedby="rates-table-description"
+                  >
                     <thead className="table-dark">
                       <tr>
                         <th scope="col">Currency</th>
-                        <th scope="col" className="text-end">NBP Mid Rate</th>
+                        <th scope="col" className="text-end d-none d-md-table-cell">NBP Mid Rate</th>
                         <th scope="col" className="text-end">Buy Rate</th>
                         <th scope="col" className="text-end">Sell Rate</th>
-                        <th scope="col" className="text-end">Margins</th>
+                        <th scope="col" className="text-end d-none d-lg-table-cell">Margins</th>
                         <th scope="col" className="text-center">Operations</th>
                       </tr>
                     </thead>
@@ -324,6 +352,9 @@ const Dashboard: React.FC<DashboardProps> = ({ defaultDate }) => {
                       ))}
                     </tbody>
                   </table>
+                  <div id="rates-table-description" className="visually-hidden">
+                    Exchange rates table showing NBP mid rates, buy/sell rates with margins, and available operations for each currency
+                  </div>
                 </div>
               </div>
               <div className="card-footer text-muted">

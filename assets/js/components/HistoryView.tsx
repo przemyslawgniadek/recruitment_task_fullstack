@@ -45,6 +45,8 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({ selectedCurrency, o
         className="form-select"
         value={selectedCurrency}
         onChange={(e) => onCurrencyChange(e.target.value as CurrencyCode)}
+        aria-label="Select currency for historical data"
+        aria-describedby="currency-help"
       >
         {currencies.map(currency => (
           <option key={currency} value={currency}>
@@ -52,6 +54,9 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({ selectedCurrency, o
           </option>
         ))}
       </select>
+      <div id="currency-help" className="visually-hidden">
+        Select a currency to view its 14-day historical exchange rate data
+      </div>
     </div>
   );
 };
@@ -107,7 +112,18 @@ const LineChart: React.FC<LineChartProps> = ({ data, width = 800, height = 400 }
   
   return (
     <div className="chart-container">
-      <svg width={width} height={height} className="border rounded">
+      <svg 
+        width={width} 
+        height={height} 
+        className="border rounded"
+        role="img"
+        aria-labelledby="chart-title"
+        aria-describedby="chart-description"
+      >
+        <title id="chart-title">Historical Exchange Rates Chart</title>
+        <desc id="chart-description">
+          Line chart showing 14-day historical exchange rates with buy and sell rates over time
+        </desc>
         <g transform={`translate(${margin.left}, ${margin.top})`}>
           {/* Grid lines */}
           {[0, 0.25, 0.5, 0.75, 1].map(ratio => (
