@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCurrentRates } from '../hooks/useApi';
 import { CurrencyCode, Rate } from '../types/api';
 
@@ -120,11 +121,20 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ currency, rate }) => {
         </small>
       </td>
       <td className="text-center">
-        {hasBuyRate ? (
-          <span className="badge bg-success">Buy & Sell</span>
-        ) : (
-          <span className="badge bg-warning text-dark">Sell Only</span>
-        )}
+        <div className="d-flex flex-column gap-1">
+          {hasBuyRate ? (
+            <span className="badge bg-success">Buy & Sell</span>
+          ) : (
+            <span className="badge bg-warning text-dark">Sell Only</span>
+          )}
+          <Link 
+            to={`/history/${currency}`} 
+            className="btn btn-outline-primary btn-sm"
+            style={{ fontSize: '0.75rem' }}
+          >
+            📈 History
+          </Link>
+        </div>
       </td>
     </tr>
   );

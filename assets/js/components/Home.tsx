@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Redirect, Switch, Link } from 'react-router-dom';
 import SetupCheck from './SetupCheck';
 import Dashboard from './Dashboard';
+import HistoryView from './HistoryView';
 
 /**
  * Home Component - Main application layout
@@ -17,18 +18,23 @@ const Home: React.FC = () => {
           Telemedi FX Desk
         </Link>
         <div id="navbarText">
-          <ul className="navbar-nav mr-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/dashboard">
-                💱 Dashboard
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/setup-check">
-                🔧 Setup Check
-              </Link>
-            </li>
-          </ul>
+                 <ul className="navbar-nav mr-auto">
+                   <li className="nav-item">
+                     <Link className="nav-link" to="/dashboard">
+                       💱 Dashboard
+                     </Link>
+                   </li>
+                   <li className="nav-item">
+                     <Link className="nav-link" to="/history">
+                       📈 History
+                     </Link>
+                   </li>
+                   <li className="nav-item">
+                     <Link className="nav-link" to="/setup-check">
+                       🔧 Setup Check
+                     </Link>
+                   </li>
+                 </ul>
         </div>
       </nav>
       
@@ -37,6 +43,10 @@ const Home: React.FC = () => {
         <Route path="/dashboard" render={() => {
           console.log("🚀 Dashboard route matched!");
           return <Dashboard />;
+        }} />
+        <Route path="/history/:currency?" render={() => {
+          console.log("📈 History route matched!");
+          return <HistoryView />;
         }} />
         <Route path="/setup-check" component={SetupCheck} />
       </Switch>
