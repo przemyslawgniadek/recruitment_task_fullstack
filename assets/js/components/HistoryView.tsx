@@ -358,4 +358,4 @@ const HistoryView: React.FC<HistoryViewProps> = ({ defaultCurrency }) => {
   );
 };
 
-export default HistoryView;
+export default React.memo(HistoryView);

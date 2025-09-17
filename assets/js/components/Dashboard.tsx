@@ -387,4 +387,4 @@ const Dashboard: React.FC<DashboardProps> = ({ defaultDate }) => {
   );
 };
 
-export default Dashboard;
+export default React.memo(Dashboard);

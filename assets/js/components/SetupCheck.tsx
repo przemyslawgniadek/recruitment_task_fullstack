@@ -209,4 +209,4 @@ const SetupCheck: React.FC = () => {
   );
 };
 
-export default SetupCheck;
+export default React.memo(SetupCheck);

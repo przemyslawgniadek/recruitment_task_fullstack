@@ -45,6 +45,29 @@ Encore
     .enableSourceMaps(!Encore.isProduction())
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
+    
+    // Performance optimizations
+    .configureSplitChunks(function(splitChunks) {
+        splitChunks.cacheGroups = {
+            // Vendor chunk for node_modules
+            vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                name: 'vendors',
+                chunks: 'all',
+                priority: 10,
+                minSize: 30000,
+            },
+            // Common chunk for shared code
+            common: {
+                name: 'common',
+                chunks: 'all',
+                minChunks: 2,
+                priority: 5,
+                reuseExistingChunk: true,
+                minSize: 10000,
+            }
+        };
+    })
 
     // configure Babel
     // .configureBabel((config) => {

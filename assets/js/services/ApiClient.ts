@@ -43,6 +43,8 @@ class ApiClient {
   private axiosInstance: AxiosInstance;
   private config: ApiClientConfig;
   private static instance: ApiClient;
+  private requestCache: Map<string, Promise<any>> = new Map();
+  private cacheTimeout: number = 5000; // 5 seconds cache for duplicate requests
 
   private constructor(config?: Partial<ApiClientConfig>) {
     this.config = { ...defaultConfig, ...config };
@@ -125,6 +127,27 @@ class ApiClient {
   }
 
   /**
+   * Request deduplication - prevents duplicate requests
+   */
+  private async deduplicateRequest<T>(cacheKey: string, requestFn: () => Promise<T>): Promise<T> {
+    // Check if request is already in progress
+    if (this.requestCache.has(cacheKey)) {
+      return this.requestCache.get(cacheKey) as Promise<T>;
+    }
+
+    // Create new request and cache it
+    const requestPromise = requestFn().finally(() => {
+      // Remove from cache after completion
+      setTimeout(() => {
+        this.requestCache.delete(cacheKey);
+      }, this.cacheTimeout);
+    });
+
+    this.requestCache.set(cacheKey, requestPromise);
+    return requestPromise;
+  }
+
+  /**
    * Delay helper for retry logic
    */
   private delay(ms: number): Promise<void> {
@@ -179,12 +202,14 @@ class ApiClient {
   ): Promise<CurrentRatesResponse> {
     const params = new URLSearchParams();
     if (request.date) params.append('date', request.date);
-
-    const response = await this.axiosInstance.get<CurrentRatesResponse>(
-      `/rates/current?${params.toString()}`,
-      { signal }
-    );
-    return response.data;
+    
+    const url = `/rates/current?${params.toString()}`;
+    const cacheKey = `getCurrentRates:${url}`;
+    
+    return this.deduplicateRequest(cacheKey, async () => {
+      const response = await this.axiosInstance.get<CurrentRatesResponse>(url, { signal });
+      return response.data;
+    });
   }
 
   /**
