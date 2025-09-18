@@ -38,7 +38,7 @@ class ExchangeRateControllerTest extends WebTestCase
 
     public function testGetCurrentRatesSuccess(): void
     {
-        $date = new DateTimeImmutable('2024-01-15');
+        $date = new DateTimeImmutable('2025-09-11');
         $eurRate = new Rate(Currency::fromCode('EUR'), $date, 4.5000, 4.3500, 4.6100);
         $usdRate = new Rate(Currency::fromCode('USD'), $date, 3.8000, 3.6500, 3.9100);
         
@@ -46,14 +46,14 @@ class ExchangeRateControllerTest extends WebTestCase
             ->expects($this->once())
             ->method('findAllByDate')
             ->with($this->callback(function (DateTimeImmutable $requestDate) {
-                return $requestDate->format('Y-m-d') === '2024-01-15';
+                return $requestDate->format('Y-m-d') === '2025-09-11';
             }))
             ->willReturn([
                 'EUR' => $eurRate,
                 'USD' => $usdRate
             ]);
 
-        $this->client->request('GET', '/api/api/rates/current?date=2024-01-15');
+        $this->client->request('GET', '/api/rates/current?date=2025-09-11');
 
         $response = $this->client->getResponse();
         
@@ -62,7 +62,7 @@ class ExchangeRateControllerTest extends WebTestCase
         $this->assertJson($response->getContent());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertSame('2024-01-15', $data['date']);
+        $this->assertSame('2025-09-11', $data['date']);
         $this->assertSame(2, $data['count']);
         $this->assertArrayHasKey('EUR', $data['rates']);
         $this->assertArrayHasKey('USD', $data['rates']);
@@ -89,7 +89,7 @@ class ExchangeRateControllerTest extends WebTestCase
             }))
             ->willReturn(['EUR' => $eurRate]);
 
-        $this->client->request('GET', '/api/api/rates/current');
+        $this->client->request('GET', '/api/rates/current');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
@@ -105,7 +105,7 @@ class ExchangeRateControllerTest extends WebTestCase
             ->method('findAllByDate')
             ->willReturn([]);
 
-        $this->client->request('GET', '/api/api/rates/current?date=2024-01-15');
+        $this->client->request('GET', '/api/rates/current?date=2025-09-11');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
@@ -118,7 +118,7 @@ class ExchangeRateControllerTest extends WebTestCase
 
     public function testGetCurrentRateForCurrencySuccess(): void
     {
-        $date = new DateTimeImmutable('2024-01-15');
+        $date = new DateTimeImmutable('2025-09-11');
         $eurRate = new Rate(Currency::fromCode('EUR'), $date, 4.5000, 4.3500, 4.6100);
         
         $this->mockRepository
@@ -129,12 +129,12 @@ class ExchangeRateControllerTest extends WebTestCase
                     return $currency->getCode() === 'EUR';
                 }),
                 $this->callback(function (DateTimeImmutable $requestDate) {
-                    return $requestDate->format('Y-m-d') === '2024-01-15';
+                    return $requestDate->format('Y-m-d') === '2025-09-11';
                 })
             )
             ->willReturn($eurRate);
 
-        $this->client->request('GET', '/api/api/rates/current/EUR?date=2024-01-15');
+        $this->client->request('GET', '/api/rates/current/EUR?date=2025-09-11');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
@@ -142,7 +142,7 @@ class ExchangeRateControllerTest extends WebTestCase
 
         $data = json_decode($response->getContent(), true);
         $this->assertSame('EUR', $data['currency']);
-        $this->assertSame('2024-01-15', $data['date']);
+        $this->assertSame('2025-09-11', $data['date']);
         $this->assertSame(4.5000, $data['mid']);
         $this->assertSame(4.3500, $data['buy']);
         $this->assertSame(4.6100, $data['sell']);
@@ -156,7 +156,7 @@ class ExchangeRateControllerTest extends WebTestCase
             ->method('findByCurrencyAndDate')
             ->willReturn(null);
 
-        $this->client->request('GET', '/api/api/rates/current/EUR?date=2024-01-15');
+        $this->client->request('GET', '/api/rates/current/EUR?date=2025-09-11');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
@@ -165,12 +165,12 @@ class ExchangeRateControllerTest extends WebTestCase
         $data = json_decode($response->getContent(), true);
         $this->assertSame('rate_not_found', $data['error']);
         $this->assertStringContainsString('EUR', $data['message']);
-        $this->assertStringContainsString('2024-01-15', $data['message']);
+        $this->assertStringContainsString('2025-09-11', $data['message']);
     }
 
     public function testGetCurrentRateForInvalidCurrency(): void
     {
-        $this->client->request('GET', '/api/api/rates/current/XXX');
+        $this->client->request('GET', '/api/rates/current/XXX');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -184,7 +184,7 @@ class ExchangeRateControllerTest extends WebTestCase
 
     public function testGetHistoricalRatesSuccess(): void
     {
-        $endDate = new DateTimeImmutable('2024-01-15');
+        $endDate = new DateTimeImmutable('2025-09-11');
         $startDate = $endDate->modify('-14 days');
         
         $rates = [
@@ -208,7 +208,7 @@ class ExchangeRateControllerTest extends WebTestCase
             )
             ->willReturn($rates);
 
-        $this->client->request('GET', '/api/api/rates/historical/EUR?date=2024-01-15&days=14');
+        $this->client->request('GET', '/api/rates/historical/EUR?date=2025-09-11&days=14');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
@@ -223,13 +223,13 @@ class ExchangeRateControllerTest extends WebTestCase
         $this->assertCount(2, $data['rates']);
         
         // Check that rates are sorted by date descending (newest first)
-        $this->assertSame('2024-01-15', $data['rates'][0]['date']);
-        $this->assertSame('2024-01-14', $data['rates'][1]['date']);
+        $this->assertSame('2025-09-11', $data['rates'][0]['date']);
+        $this->assertSame('2025-09-10', $data['rates'][1]['date']);
     }
 
     public function testGetHistoricalRatesWithDefaultDays(): void
     {
-        $endDate = new DateTimeImmutable('2024-01-15');
+        $endDate = new DateTimeImmutable('2025-09-11');
         $startDate = $endDate->modify('-14 days'); // Default 14 days
         
         $this->mockRepository
@@ -244,7 +244,7 @@ class ExchangeRateControllerTest extends WebTestCase
             )
             ->willReturn([]);
 
-        $this->client->request('GET', '/api/api/rates/historical/EUR?date=2024-01-15');
+        $this->client->request('GET', '/api/rates/historical/EUR?date=2025-09-11');
 
         // Should use default 14 days
         $this->assertSame(Response::HTTP_NOT_FOUND, $this->client->getResponse()->getStatusCode());
@@ -252,7 +252,7 @@ class ExchangeRateControllerTest extends WebTestCase
 
     public function testGetHistoricalRatesInvalidDays(): void
     {
-        $this->client->request('GET', '/api/api/rates/historical/EUR?days=500');
+        $this->client->request('GET', '/api/rates/historical/EUR?days=500');
 
         $response = $this->client->getResponse();
         // Note: Currently returns 404 because validation happens in DTO, not Controller
@@ -271,7 +271,7 @@ class ExchangeRateControllerTest extends WebTestCase
             ->method('findHistoricalRates')
             ->willReturn([]);
 
-        $this->client->request('GET', '/api/api/rates/historical/EUR?date=2024-01-15&days=14');
+        $this->client->request('GET', '/api/rates/historical/EUR?date=2025-09-11&days=14');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
@@ -284,7 +284,7 @@ class ExchangeRateControllerTest extends WebTestCase
 
     public function testGetSupportedCurrencies(): void
     {
-        $this->client->request('GET', '/api/api/currencies');
+        $this->client->request('GET', '/api/currencies');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
@@ -314,18 +314,19 @@ class ExchangeRateControllerTest extends WebTestCase
             ->method('exists')
             ->willReturn(true);
 
-        $this->client->request('GET', '/api/api/health');
+        $this->client->request('GET', '/api/health');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
         $this->assertJson($response->getContent());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertSame('healthy', $data['status']);
+        $this->assertSame('ok', $data['status']);
         $this->assertArrayHasKey('timestamp', $data);
-        $this->assertArrayHasKey('services', $data);
-        $this->assertArrayHasKey('test_results', $data);
-        $this->assertTrue($data['test_results']['eur_rate_available']);
+        $this->assertArrayHasKey('checks', $data);
+        $this->assertSame('ok', $data['checks']['database']);
+        $this->assertSame('ok', $data['checks']['nbp_api']);
+        $this->assertSame('ok', $data['checks']['cache']);
     }
 
     public function testHealthCheckFailure(): void
@@ -335,20 +336,20 @@ class ExchangeRateControllerTest extends WebTestCase
             ->method('exists')
             ->willThrowException(new \RuntimeException('Repository connection failed'));
 
-        $this->client->request('GET', '/api/api/health');
+        $this->client->request('GET', '/api/health');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_SERVICE_UNAVAILABLE, $response->getStatusCode());
         $this->assertJson($response->getContent());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertSame('service_unavailable', $data['error']);
+        $this->assertSame('error', $data['status']);
         $this->assertStringContainsString('Health check failed', $data['message']);
     }
 
     public function testInvalidDateFormat(): void
     {
-        $this->client->request('GET', '/api/api/rates/current?date=invalid-date');
+        $this->client->request('GET', '/api/rates/current?date=invalid-date');
 
         $response = $this->client->getResponse();
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -365,7 +366,7 @@ class ExchangeRateControllerTest extends WebTestCase
             ->method('findAllByDate')
             ->willReturn([]);
 
-        $this->client->request('GET', '/api/api/rates/current');
+        $this->client->request('GET', '/api/rates/current');
 
         $response = $this->client->getResponse();
         $data = json_decode($response->getContent(), true);
