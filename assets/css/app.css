@@ -1,3 +1,219 @@
+/* Professional FX Desk Theme */
 body {
-    background-color: lightgray;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #212529;
+    min-height: 100vh;
+}
+
+/* Professional card styling */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
+}
+
+/* Enhanced table styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.08);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+    transition: all 0.2s ease;
+}
+
+.table-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+    border-left: 4px solid #198754;
+}
+
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    border-left: 4px solid #ffc107;
+}
+
+/* Date Picker Custom Styling */
+.date-picker-container input[type="date"] {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #adb5bd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 500;
+    color: #495057;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.date-picker-container input[type="date"]:hover {
+    border-color: #6c757d;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.date-picker-container input[type="date"]:focus {
+    border-color: #0d6efd;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25), 0 4px 12px rgba(0,0,0,0.2);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+/* Calendar icon styling */
+.date-picker-container input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.4);
+    transition: filter 0.2s ease;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.date-picker-container input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    filter: invert(0.2);
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* Date text styling */
+.date-picker-container input[type="date"]::-webkit-datetime-edit {
+    color: #495057;
+    font-weight: 600;
+}
+
+.date-picker-container input[type="date"]::-webkit-datetime-edit-text {
+    color: #6c757d;
+    font-weight: 400;
+}
+
+/* Individual date fields */
+.date-picker-container input[type="date"]::-webkit-datetime-edit-month-field,
+.date-picker-container input[type="date"]::-webkit-datetime-edit-day-field,
+.date-picker-container input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #212529;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+/* Focused/selected date field styling */
+.date-picker-container input[type="date"]:focus::-webkit-datetime-edit-month-field:focus,
+.date-picker-container input[type="date"]:focus::-webkit-datetime-edit-day-field:focus,
+.date-picker-container input[type="date"]:focus::-webkit-datetime-edit-year-field:focus {
+    background-color: #495057;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(73, 80, 87, 0.3);
+}
+
+/* Enhanced visual feedback */
+.date-picker-container {
+    position: relative;
+}
+
+.date-picker-container::after {
+    content: "📅";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+/* Professional button styling */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-width: 2px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Enhanced badges */
+.badge {
+    font-weight: 600;
+    padding: 0.5em 0.75em;
+    border-radius: 6px;
+    font-size: 0.75em;
+}
+
+/* Loading states */
+.spinner-border {
+    animation: spinner-border 0.75s linear infinite;
+}
+
+/* Professional alerts */
+.alert {
+    border: none;
+    border-radius: 10px;
+    border-left: 4px solid;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .table-sm td, .table-sm th {
+        padding: 0.5rem 0.25rem;
+    }
+}
+
+/* Focus indicators for accessibility */
+.btn:focus,
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
 }

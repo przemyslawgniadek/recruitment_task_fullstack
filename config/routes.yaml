@@ -4,16 +4,22 @@
 #  methods:  GET
 #
 
+# API Routes
+api_exchange_rates:
+    resource: ../src/Controller/ExchangeRateController.php
+    type: annotation
+
+# Setup check endpoint (redirect to health check)
 setupcheck:
     path: /api/setup-check
-    controller: App\Controller\DefaultController::setupCheck
+    controller: App\Controller\ExchangeRateController::healthCheck
 
+# Frontend routes - serve React app for all non-API routes
 index:
     path: /{wildcard}
     defaults: {
-        _controller: App\Controller\DefaultController::index
+        _controller: App\Controller\ExchangeRateController::index
     }
     requirements:
-        wildcard: .*
-    # controller: App\Controller\DefaultController::index
+        wildcard: ^(?!api/).*
 

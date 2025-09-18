@@ -20,7 +20,7 @@ Encore
      * Each entry will result in one JavaScript file (e.g. app.js)
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
-    .addEntry('app', './assets/js/app.js')
+    .addEntry('app', './assets/js/app.tsx')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     //.enableStimulusBridge('./assets/controllers.json')
@@ -45,6 +45,29 @@ Encore
     .enableSourceMaps(!Encore.isProduction())
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
+    
+    // Performance optimizations
+    .configureSplitChunks(function(splitChunks) {
+        splitChunks.cacheGroups = {
+            // Vendor chunk for node_modules
+            vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                name: 'vendors',
+                chunks: 'all',
+                priority: 10,
+                minSize: 30000,
+            },
+            // Common chunk for shared code
+            common: {
+                name: 'common',
+                chunks: 'all',
+                minChunks: 2,
+                priority: 5,
+                reuseExistingChunk: true,
+                minSize: 10000,
+            }
+        };
+    })
 
     // configure Babel
     // .configureBabel((config) => {
@@ -60,8 +83,8 @@ Encore
     // enables Sass/SCSS support
     //.enableSassLoader()
 
-    // uncomment if you use TypeScript
-    //.enableTypeScriptLoader()
+    // Enable TypeScript support - wymagane przez ENGINEERING_GUIDE "Frontend (React + TS)"
+    .enableTypeScriptLoader()
 
     // uncomment if you use React
     .enableReactPreset()

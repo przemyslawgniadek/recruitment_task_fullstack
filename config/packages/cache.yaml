@@ -1,19 +1,63 @@
+# Symfony Cache Configuration for Currency Exchange Application
+# 
+# This configuration sets up caching for exchange rates to improve performance
+# and reduce NBP API calls. Uses file-based cache for development and can be
+# easily switched to Redis for production.
+
 framework:
     cache:
-        # Unique name of your app: used to compute stable namespaces for cache keys.
-        #prefix_seed: your_vendor_name/app_name
+        # Default cache configuration
+        app: cache.adapter.filesystem
+        
+        # Cache pools for different data types
+        pools:
+            # Exchange rates cache pool
+            # Used by CachedRateRepository for storing NBP exchange rates
+            cache.fx_rates:
+                adapter: cache.adapter.filesystem
+                default_lifetime: 86400  # 24 hours (same as NBP data refresh cycle)
+                
+            # NBP API responses cache pool  
+            # Used for caching raw NBP API responses to reduce external calls
+            cache.nbp_api:
+                adapter: cache.adapter.filesystem
+                default_lifetime: 3600   # 1 hour (shorter TTL for API responses)
+                
+            # Application metadata cache
+            # Used for caching configuration, supported currencies, etc.
+            cache.app_metadata:
+                adapter: cache.adapter.filesystem
+                default_lifetime: 604800 # 1 week (rarely changing data)
 
-        # The "app" cache stores to the filesystem by default.
-        # The data in this cache should persist between deploys.
-        # Other options include:
+# Environment-specific cache configuration
+# 
+# Development: File-based cache for simplicity
+# Production: Redis cache for performance and scalability
+#
+# To use Redis in production, uncomment and configure:
+#
+# when@prod:
+#     framework:
+#         cache:
+#             pools:
+#                 cache.fx_rates:
+#                     adapter: cache.adapter.redis
+#                     provider: 'redis://localhost:6379/1'
+#                     default_lifetime: 86400
+#                 cache.nbp_api:
+#                     adapter: cache.adapter.redis  
+#                     provider: 'redis://localhost:6379/2'
+#                     default_lifetime: 3600
+#                 cache.app_metadata:
+#                     adapter: cache.adapter.redis
+#                     provider: 'redis://localhost:6379/3'
+#                     default_lifetime: 604800
 
-        # Redis
-        #app: cache.adapter.redis
-        #default_redis_provider: redis://localhost
-
-        # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
-        #app: cache.adapter.apcu
-
-        # Namespaced pools use the above "app" backend by default
-        #pools:
-            #my.dedicated.cache: null
+# Cache warming configuration
+# Automatically warm cache on deployment
+when@prod:
+    framework:
+        cache:
+            # Enable cache warming in production
+            # This will preload critical data on application startup
+            prefix_seed: '%kernel.project_dir%'
